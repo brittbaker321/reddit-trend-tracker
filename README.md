@@ -12,7 +12,7 @@ An AWS Lambda-based project that tracks technology trends from any subreddit by 
 - Implements incremental loading (one snapshot per day)
 - Configurable post and comment analysis depth
 
-![Snowflake Chart](images/snowflake_chart_reddit_chatter.png)
+![Snowflake Chart](snowflake_chart_reddit_chatter.png)
 
 ## Prerequisites
 
