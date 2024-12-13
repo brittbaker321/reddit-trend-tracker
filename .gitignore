@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.py[cod]
+*.class
+
+# Local development and deployment
+config.py
+package/
+lambda_deployment.zip
+
+# Policy files
+*-policy.json
+cloudwatch-policy.json
+lambda-policy.json
+s3-policy.json
+snowflake-secret-policy.json
+trust-policy.json
+
+# Mac system files
+.DS_Store
