@@ -1,6 +1,6 @@
 # Reddit Technology Trend Tracker
 
-An AWS Lambda-based project that tracks trends from any subreddit by analyzing posts and comments for keyword mentions (defined by you). The project collects daily snapshots and stores them in Snowflake for trend analysis.
+An AWS Lambda-based project that tracks trends from any subreddit by analyzing posts and comments for keyword mentions. The project collects daily snapshots and stores them in Snowflake for trend analysis.
 
 ![tracker-flow](tracker-flow.png)
 
@@ -16,7 +16,7 @@ An AWS Lambda-based project that tracks trends from any subreddit by analyzing p
 - Tracking most talked about technology from r/dataengineering
 - See the technology_keywords.csv in the templates directory
 
-<img src=".image/snowflake_chart_reddit_chatter.png" alt="Snowflake Chart" width="500"/>
+![Snowflake Chart](images/snowflake_chart_reddit_chatter.png)
 
 ## Prerequisites
 
@@ -55,13 +55,13 @@ An AWS Lambda-based project that tracks trends from any subreddit by analyzing p
    aws s3 mb s3://your-bucket-name --region your-region
 
    # Create keywords file
-   echo "python\naws\ndata engineering" > keywords.csv
+   echo "python\naws\<subreddit>" > keywords.csv
 
    # Upload to S3
-   aws s3 cp keywords.csv s3://your-bucket-name/data_eng/keywords.csv
+   aws s3 cp keywords.csv s3://your-bucket-name/folder_name/keywords.csv
    ```
 
-4. Set up Secrets Manager:
+5. Set up Secrets Manager:
    ```bash
    # Create secret (replace values in json)
    aws secretsmanager create-secret \
