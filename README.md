@@ -2,7 +2,7 @@
 
 An AWS Lambda-based project that tracks trends from any subreddit by analyzing posts and comments for keyword mentions. The project collects daily snapshots and stores them in Snowflake for trend analysis.
 
-![tracker-flow](tracker-flow.png)
+![tracker-flow](images/tracker-flow.png)
 
 ## Overview
 - Analyzes posts and their highest-scoring comments from a specified subreddit
