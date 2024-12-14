@@ -1,4 +1,4 @@
-# Reddit Technology Trend Tracker
+# Reddit Trend Tracker
 
 An AWS Lambda-based project that tracks trends from any subreddit by analyzing posts and comments for keyword mentions. The project collects daily snapshots and stores them in Snowflake for trend analysis.
 
@@ -54,7 +54,7 @@ An AWS Lambda-based project that tracks trends from any subreddit by analyzing p
    # Create bucket (replace with your-s3-bucket)
    aws s3 mb s3://your-s3-bucket --region your-aws-region
 
-   # Create keywords file with technology terms to track (replace with your subreddit)
+   # Create keywords file with words you want to track (replace with your subreddit)
    echo "python\naws\ndataengineering" > keywords.csv
 
    # Upload to S3 (your-s3-key-path should match KEYWORDS_KEY in config.py)
@@ -94,7 +94,7 @@ An AWS Lambda-based project that tracks trends from any subreddit by analyzing p
 
    -- Create role and user
    CREATE ROLE reddit_tracker_role;
-   CREATE USER reddit_tracker_user PASSWORD = 'your_password';
+   CREATE USER reddit_tracker_user PASSWORD = 'choose a smart password';
    
    -- Grant permissions
    GRANT ROLE reddit_tracker_role TO USER reddit_tracker_user;
