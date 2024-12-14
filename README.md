@@ -51,15 +51,16 @@ An AWS Lambda-based project that tracks trends from any subreddit by analyzing p
 
 3. Create S3 Bucket and Upload Keywords:
    ```bash
-   # Create bucket
-   aws s3 mb s3://your-bucket-name --region your-region
+   # Create bucket (replace with your-s3-bucket)
+   aws s3 mb s3://your-s3-bucket --region your-aws-region
 
-   # Create keywords file
-   echo "python\naws\<subreddit>" > keywords.csv
+   # Create keywords file with technology terms to track (replace with your subreddit)
+   echo "python\naws\ndataengineering" > keywords.csv
 
-   # Upload to S3
-   aws s3 cp keywords.csv s3://your-bucket-name/folder_name/keywords.csv
-   ```
+   # Upload to S3 (your-s3-key-path should match KEYWORDS_KEY in config.py)
+   aws s3 cp keywords.csv s3://your-s3-bucket/your-s3-key-path
+
+
 
 5. Set up Secrets Manager:
    ```bash
