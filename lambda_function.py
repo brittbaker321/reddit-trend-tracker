@@ -4,18 +4,30 @@ import praw
 import boto3
 import csv
 import io
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from collections import Counter
-from snowflake.connector import connect
+from typing import Dict, Set, Tuple, Any, Optional, List
+from snowflake.connector import connect, SnowflakeConnection
+from snowflake.connector.cursor import SnowflakeCursor
 from snowflake.connector.errors import Error, OperationalError, ProgrammingError
 
 try:
     import config as cfg  # Local development settings
 except ImportError:
-    import config_template as cfg  # Template settings for deployment
+    raise ImportError(
+        "Missing 'config.py'. Please create a 'config.py' file based on 'config_template.py' and fill in the required settings."
+        )
 
-def get_secrets():
-    """Retrieve secrets from AWS Secrets Manager"""
+def get_secrets() -> Dict[str, str]:
+    """
+    Retrieve secrets from AWS Secrets Manager.
+
+    Returns:
+        Dict[str, str]: Dictionary containing secret keys and their corresponding values.
+
+    Raises:
+        Exception: If there is an error while fetching or parsing the secrets.
+    """
     start = datetime.now()
     print(f"Starting secrets retrieval at {start}")
     
@@ -32,8 +44,16 @@ def get_secrets():
         print(f"Error retrieving secrets: {str(e)}")
         raise
 
-def get_snowflake_connection():
-    """Establish Snowflake connection using secrets"""
+def get_snowflake_connection() -> SnowflakeConnection:
+    """
+    Establish a connection to the Snowflake database.
+
+    Returns:
+        SnowflakeConnection: A connected Snowflake database connection object.
+
+    Raises:
+        Error: If a Snowflake-specific error occurs during connection.
+    """
     start = datetime.now()
     print(f"Starting Snowflake connection at {start}")
     
@@ -49,7 +69,7 @@ def get_snowflake_connection():
         )
         
         # Explicitly set database and schema
-        cur = conn.cursor()
+        cur: SnowflakeCursor = conn.cursor()
         cur.execute(f"USE DATABASE {secrets['database']}")
         cur.execute(f"USE SCHEMA {secrets['schema']}")
         cur.close()
@@ -61,8 +81,16 @@ def get_snowflake_connection():
         print(f"Snowflake error: {str(e)}")
         raise
 
-def get_reddit_connection():
-    """Establish Reddit connection using environment variables"""
+def get_reddit_connection() -> praw.Reddit:
+    """
+    Establish a connection to Reddit using PRAW.
+
+    Returns:
+        praw.Reddit: An authenticated Reddit API client.
+
+    Raises:
+        Exception: If the environment variables are missing or incorrect.
+    """
     start = datetime.now()
     print(f"Starting Reddit connection at {start}")
     
@@ -79,8 +107,16 @@ def get_reddit_connection():
         print(f"Reddit connection error: {str(e)}")
         raise
 
-def load_keywords_from_s3():
-    """Load keywords from S3 CSV file"""
+def load_keywords_from_s3() -> Set[str]:
+    """
+    Load keywords from a CSV file stored in an S3 bucket.
+
+    Returns:
+        Set[str]: A set of unique keywords loaded from the S3 file.
+
+    Raises:
+        Exception: If an error occurs while accessing or processing the S3 file.
+    """
     start = datetime.now()
     print(f"Starting S3 keywords load at {start}")
     print(f"Attempting to load from bucket: {cfg.BUCKET_NAME}, key: {cfg.KEYWORDS_KEY}")
@@ -103,7 +139,7 @@ def load_keywords_from_s3():
         
         # Process keywords
         process_start = datetime.now()
-        keywords = set()
+        keywords: Set[str] = set()
         for row in csv.reader(io.StringIO(csv_content)):
             keywords.update(word.lower().strip() for word in row if word.strip())
         print(f"Processing keywords took: {datetime.now() - process_start}")
@@ -116,8 +152,18 @@ def load_keywords_from_s3():
         print(f"S3 error: {str(e)}")
         raise
 
-def analyze_reddit_trends():
-    """Analyze Reddit trends based on keyword mentions for previous day"""
+def analyze_reddit_trends() -> Tuple[Dict[str, int], date]:
+    """
+    Analyze Reddit posts and comments for keyword mentions from the previous day.
+
+    Returns:
+        Tuple[Dict[str, int], date]: A tuple containing:
+            - Dictionary mapping keywords to their mention counts
+            - Date of the snapshot
+
+    Raises:
+        Exception: If there is an error during the Reddit API query or analysis process.
+    """
     start = datetime.now()
     print(f"Starting Reddit analysis at {start}")
     
@@ -139,13 +185,10 @@ def analyze_reddit_trends():
         
         print(f"Collecting posts from {datetime.fromtimestamp(yesterday_start)} to {datetime.fromtimestamp(yesterday_end)}")
         
-        # Use timestamp-based filtering
-        posts = subreddit.new(limit=cfg.POST_LIMIT)
-        
         # Process posts
         posts_start = datetime.now()
         post_count = 0
-        for post in posts:
+        for post in subreddit.new(limit=cfg.POST_LIMIT):
             # Skip posts not from yesterday
             if not (yesterday_start <= post.created_utc <= yesterday_end):
                 continue
@@ -188,8 +231,17 @@ def analyze_reddit_trends():
         print(f"Reddit analysis error: {str(e)}")
         raise
 
-def save_to_snowflake(trends_data, snapshot_date):
-    """Save trends data to Snowflake"""
+def save_to_snowflake(trends_data: Dict[str, int], snapshot_date: date) -> None:
+    """
+    Save trends data to the Snowflake table.
+
+    Args:
+        trends_data: Dictionary mapping keywords to their mention counts
+        snapshot_date: The date of the snapshot to save
+
+    Raises:
+        Error: If a Snowflake-specific error occurs during the operation
+    """
     start = datetime.now()
     print(f"Starting Snowflake save at {start}")
     
@@ -237,8 +289,17 @@ def save_to_snowflake(trends_data, snapshot_date):
         cur.close()
         conn.close()
 
-def lambda_handler(event, context):
-    """AWS Lambda handler"""
+def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, str]:
+    """
+    AWS Lambda handler for processing Reddit trends.
+
+    Args:
+        event: Event data passed to the Lambda function
+        context: Runtime information provided by AWS Lambda
+
+    Returns:
+        Dict[str, str]: Response containing execution status and details
+    """
     overall_start = datetime.now()
     print(f"Starting Lambda execution at {overall_start}")
     
@@ -251,7 +312,7 @@ def lambda_handler(event, context):
         print(f"Total Lambda execution took: {overall_end - overall_start}")
         
         return {
-            'statusCode': 200,
+            'statusCode': '200',
             'body': json.dumps('Successfully processed and saved Reddit trends'),
             'executionTime': str(overall_end - overall_start),
             'date_processed': str(snapshot_date)
@@ -259,7 +320,7 @@ def lambda_handler(event, context):
     except Exception as e:
         print(f"Lambda execution error: {str(e)}")
         return {
-            'statusCode': 500,
+            'statusCode': '500',
             'body': json.dumps(f"Error: {str(e)}")
         }
 
