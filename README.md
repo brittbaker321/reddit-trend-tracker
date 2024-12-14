@@ -16,7 +16,7 @@ An AWS Lambda-based project that tracks trends from any subreddit by analyzing p
 - Tracking most talked about technology from r/dataengineering
 - See the technology_keywords.csv in the templates directory
 
-<img src="image/snowflake_chart_reddit_chatter.png" alt="Snowflake Chart" width="500"/>
+<img src=".image/snowflake_chart_reddit_chatter.png" alt="Snowflake Chart" width="500"/>
 
 ## Prerequisites
 
