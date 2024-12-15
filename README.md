@@ -104,6 +104,7 @@ An AWS Lambda-based project that tracks trends from any subreddit by analyzing p
    
    -- Create table
    CREATE TABLE your_database.your_schema.REDDIT_TRENDS (
+       TREND_ID UUID PRIMARY KEY,
        SNAPSHOT_TIME TIMESTAMP_NTZ,
        SNAPSHOT_DATE DATE,
        KEYWORD STRING,
@@ -134,8 +135,8 @@ An AWS Lambda-based project that tracks trends from any subreddit by analyzing p
 1. Clone and Setup Environment:
    ```bash
    # Clone repository
-   git clone https://github.com/your-username/reddit-tech-tracker.git
-   cd reddit-tech-tracker
+   git clone https://github.com/your-username/reddit-trend-tracker.git
+   cd reddit-trend-tracker
 
    # Create virtual environment
    python -m venv venv
@@ -173,7 +174,7 @@ An AWS Lambda-based project that tracks trends from any subreddit by analyzing p
    ```bash
    # Create function
    aws lambda create-function \
-     --function-name RedditTechTracker \
+     --function-name RedditTrendTracker \
      --runtime python3.9 \
      --handler lambda_function.lambda_handler \
      --role arn:aws:iam::YOUR_ACCOUNT_ID:role/RedditTrendTrackerRole \
@@ -183,7 +184,7 @@ An AWS Lambda-based project that tracks trends from any subreddit by analyzing p
 
    # Add environment variables
    aws lambda update-function-configuration \
-     --function-name RedditTechTracker \
+     --function-name RedditTrendTracker \
      --environment "Variables={
        REDDIT_CLIENT_ID=your_client_id,
        REDDIT_CLIENT_SECRET=your_client_secret,
@@ -203,7 +204,7 @@ An AWS Lambda-based project that tracks trends from any subreddit by analyzing p
 
    # Add Lambda permission
    aws lambda add-permission \
-     --function-name RedditTechTracker \
+     --function-name RedditTrendTracker \
      --statement-id DailyRedditTrendAnalysis \
      --action lambda:InvokeFunction \
      --principal events.amazonaws.com \
@@ -216,7 +217,7 @@ An AWS Lambda-based project that tracks trends from any subreddit by analyzing p
    ```bash
    # Invoke function
    aws lambda invoke \
-     --function-name RedditTechTracker \
+     --function-name RedditTrendTracker \
      --payload '{}' \
      --cli-read-timeout 300 \
      output.json
@@ -228,9 +229,9 @@ An AWS Lambda-based project that tracks trends from any subreddit by analyzing p
 2. Check Snowflake Results:
    ```sql
    -- Most mentioned keywords
-   SELECT KEYWORD, SUM(MENTION_COUNT) as TOTAL_MENTIONS
+   SELECT TREND_ID, KEYWORD, SUM(MENTION_COUNT) as TOTAL_MENTIONS
    FROM REDDIT_TRENDS
-   GROUP BY KEYWORD
+   GROUP BY TREND_ID, KEYWORD
    ORDER BY TOTAL_MENTIONS DESC
    LIMIT 10;
    ```
@@ -244,7 +245,7 @@ An AWS Lambda-based project that tracks trends from any subreddit by analyzing p
 
    # Update function
    aws lambda update-function-code \
-     --function-name RedditTechTracker \
+     --function-name RedditTrendTracker \
      --zip-file fileb://lambda_deployment.zip
    ```
 
@@ -264,7 +265,7 @@ An AWS Lambda-based project that tracks trends from any subreddit by analyzing p
    ```bash
    # Get log group name
    aws logs describe-log-groups \
-     --log-group-name-prefix "/aws/lambda/RedditTechTracker"
+     --log-group-name-prefix "/aws/lambda/RedditTrendTracker"
 
    # Get recent logs
    aws logs get-log-events \
