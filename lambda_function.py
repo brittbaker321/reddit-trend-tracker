@@ -4,6 +4,7 @@ import praw
 import boto3
 import csv
 import io
+import uuid
 from datetime import datetime, timedelta, date
 from collections import Counter
 from typing import Dict, Set, Tuple, Any, Optional, List
@@ -267,12 +268,12 @@ def save_to_snowflake(trends_data: Dict[str, int], snapshot_date: date) -> None:
         # Prepare and insert data
         insert_start = datetime.now()
         snapshot_time = datetime.utcnow()
-        records = [(snapshot_time, snapshot_date, keyword, count) 
+        records = [(str(uuid.uuid4()), snapshot_time, snapshot_date, keyword, count) 
                   for keyword, count in trends_data.items()]
         
         cur.executemany("""
-        INSERT INTO REDDIT_TRENDS (SNAPSHOT_TIME, SNAPSHOT_DATE, KEYWORD, MENTION_COUNT)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO REDDIT_TRENDS (TREND_ID, SNAPSHOT_TIME, SNAPSHOT_DATE, KEYWORD, MENTION_COUNT)
+        VALUES (%s, %s, %s, %s, %s)
         """, records)
         
         conn.commit()
