@@ -283,4 +283,3 @@ An AWS Lambda-based project that tracks trends from any subreddit by analyzing p
    - "Unable to import module 'lambda_function'": Rebuild deployment package
    - "Snowflake connection error": Verify credentials in Secrets Manager
    - "S3 access denied": Check IAM role permissions
-
